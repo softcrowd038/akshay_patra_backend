@@ -8,6 +8,7 @@ const loginUser = async (req, res) => {
 
     console.log("Incoming login data:", req.body);
 
+   
     if (!email || !password) {
       return res.status(400).send({
         success: false,
@@ -15,6 +16,7 @@ const loginUser = async (req, res) => {
       });
     }
 
+    
     const user = await User.findByEmail(email);
     if (!user) {
       return res.status(401).send({
@@ -23,6 +25,7 @@ const loginUser = async (req, res) => {
       });
     }
 
+   
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).send({
@@ -30,18 +33,29 @@ const loginUser = async (req, res) => {
         message: "Invalid email or password",
       });
     }
+   
 
-    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    let uniqueId =  user.id;
+    if (!uniqueId) {
+      uniqueId = uuidv4(); 
+      user.uuid = uniqueId;   
+      await user.save(); 
+    }  
+    const token = jwt.sign(
+      { id: uniqueId, uuid: user.uuid , email: user.email, role: user.role || 'user' },  
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    ); 
 
+    const username = user.username;
+    const uuid = user.uuid;
     res.status(200).send({
       success: true,
       message: "Login successful",
       token, 
-      data: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-      },
+      username,
+      email,
+      uuid       
     });
   } catch (error) {
     console.error("Error occurred during login:", error);

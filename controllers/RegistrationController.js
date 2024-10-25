@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt'; 
-import User from '../Models/UserModel.js';  
+import User from '../Models/UserModel.js';
+import { v4 as uuidv4 } from 'uuid';  
 
 const registerUser = async (req, res) => {
   try {
@@ -7,19 +8,13 @@ const registerUser = async (req, res) => {
 
     console.log("Incoming registration data:", req.body);
 
-    if (!username || !email || !password || !rePassword) {
+    if (!username || !email || !password) {
       return res.status(400).send({
         success: false,
-        message: "Please provide username, email, password, and re-entered password",
+        message: "Please provide username, email, password",
       });
     }
     
-    if (password !== rePassword) {
-      return res.status(400).send({
-        success: false,
-        message: "Passwords do not match",
-      });
-    }
 
 
     await User.createUsersTable(); 
@@ -34,13 +29,16 @@ const registerUser = async (req, res) => {
 
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
-    const userId = await User.createUser(username, email, passwordHash);
+    const uuid = uuidv4();
+    const userId = await User.createUser(uuid, username, email, passwordHash);
+    
 
     res.status(201).send({
       success: true,
       message: "User registered successfully",
       data: {
         id: userId,
+        uuid,
         username,
         email,
         passwordHash
