@@ -38,8 +38,8 @@ const User = {
         firstname VARCHAR(255) NOT NULL,
         lastname VARCHAR(255) NOT NULL,
         location VARCHAR(255) NOT NULL,
-        latitude FLOAT NOT NULL,
-        longitude FLOAT NOT NULL, 
+        latitude DECIMAL(18, 15) NOT NULL,
+        longitude DECIMAL(18, 15) NOT NULL, 
         birthdate DATE NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )

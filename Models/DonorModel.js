@@ -4,7 +4,7 @@ const Donor = {
  
   async createDonorMeal(uuid, imageurl, description, donation_date, donation_time, quantity, location, latitude, longitude ) {
     const insertDonorMeal = `
-      INSERT INTO donorProfile (uuid, imageurl, description, donation_date, donation_time, quantity, location, latitude, longitude )
+      INSERT INTO donorprofile (uuid, imageurl, description, donation_date, donation_time, quantity, location, latitude, longitude )
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
@@ -14,14 +14,13 @@ const Donor = {
   },
 
   async getDonorMealByUUID(uuid) {
-    const query = `SELECT * FROM usersProfile WHERE uuid = ?`;
-    const [rows] = await mysqlPool.query(query, [uuid]);
-    return rows[0]; 
+    const [results] = await mysqlPool.query('SELECT * FROM donorprofile WHERE uuid = ?', [uuid]);
+    return results.length ? results[0] : null; 
   },
 
   async createDonorMealTable() {
     const createDonorMealTable = `
-      CREATE TABLE IF NOT EXISTS donorProfile (
+      CREATE TABLE IF NOT EXISTS donorprofile (
         id INT AUTO_INCREMENT PRIMARY KEY,
         uuid VARCHAR(36) NOT NULL, 
         imageurl VARCHAR(255) NOT NULL,
@@ -30,19 +29,50 @@ const Donor = {
         donation_time VARCHAR(255) NOT NULL,
         quantity INT(255) NOT NULL,
         location VARCHAR(255) NOT NULL,
-        latitude FLOAT NOT NULL,
-        longitude FLOAT NOT NULL, 
+        latitude DECIMAL(18, 15),
+        longitude DECIMAL(18, 15), 
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
     await mysqlPool.query(createDonorMealTable); 
 },
 
-  async deleteDonorMealByUUID(uuid) {
-    const deleteQuery = `DELETE FROM usersProfile WHERE uuid = ?`;
-    const [result] = await mysqlPool.query(deleteQuery, [uuid]);
-    return result.affectedRows > 0; 
-  }
+async createDonorMealHistoryTable() {
+  const createDonorMealHistoryTable = `
+    CREATE TABLE IF NOT EXISTS donormealhistory  (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      uuid VARCHAR(36) NOT NULL, 
+      imageurl VARCHAR(255) NOT NULL,
+      description VARCHAR(255) NOT NULL,
+      donation_date VARCHAR(255) NOT NULL,
+      donation_time VARCHAR(255) NOT NULL,
+      quantity INT(255) NOT NULL,
+      location VARCHAR(255) NOT NULL,
+      latitude DECIMAL(18, 15),
+      longitude DECIMAL(18, 15), 
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `;
+  await mysqlPool.query(createDonorMealHistoryTable); 
+},
+
+
+async createDonorMealHistory(uuid, imageurl, description, donation_date, donation_time, quantity, location, latitude, longitude ) {
+  const insertDonorMeal = `
+    INSERT INTO donormealhistory (uuid, imageurl, description, donation_date, donation_time, quantity, location, latitude, longitude )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  const values = [uuid, imageurl, description, donation_date, donation_time, quantity, location, latitude, longitude];
+  await mysqlPool.query(insertDonorMeal, values);
+  return uuid;
+},
+
+async getDonorMealHistoryByUUID(uuid) {
+  const [results] = await mysqlPool.query('SELECT * FROM donormealhistory WHERE uuid = ?', [uuid]);
+  return results.length ? results[0] : null; 
+},
+
 };
 
 export default Donor;

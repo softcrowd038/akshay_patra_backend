@@ -3,13 +3,12 @@ import { getLatLong, getLatLongByID, createLatLong, deleteLatLongById } from '..
 import registerUser from '../controllers/RegistrationController.js';
 import loginUser from '../controllers/LoginControllers.js'; 
 import { fetchUserProfile, profileDetails, updateUserProfile} from '../controllers/ProfileDetails.js';
-import { donorMealDetails } from '../controllers/DonorMeal.js';
-import { informerDetails } from '../controllers/Informer.js';
+import { donorMealDetails, getDonorMealDetailsByUUID, getDonorMealHistoryDetailsByUUID } from '../controllers/DonorMeal.js';
+import { getInformerDetails, getInformerHistoryDetails, informerDetails, updateInformer } from '../controllers/Informer.js';
+import { getAllClosestInformer, storeallClosestInformers, updateClosestInformer } from '../controllers/NearbyLocationController.js';
+
 
 const routes = express.Router();
-
-
-
 
 routes.get("/getall", (req, res) => {
     getLatLong(req, res); 
@@ -63,6 +62,39 @@ routes.post("/donormeal", (req, res) => {
 routes.post("/informer", (req, res) => {
     informerDetails(req, res);
 });
+
+routes.get("/donor/meals/:uuid", (req, res) => {
+    getDonorMealDetailsByUUID(req, res);
+});
+
+routes.get("/donor/meals/history/:uuid", (req, res) => {
+    getDonorMealHistoryDetailsByUUID(req, res);
+});
+
+routes.get("/getinformer", (req, res) => {
+    getInformerDetails(req, res);
+});
+
+routes.get("/getinformer/history/:uuid", (req, res) => {
+    getInformerHistoryDetails(req, res);
+});
+
+routes.post("/storeClosestInformers/:uuid", (req, res) => {
+    storeallClosestInformers(req, res);
+});
+
+routes.get('/closest-informers/:donorUUID', async (req, res) => {
+    getAllClosestInformer(req, res);
+  });
+
+  routes.patch('/informerupdate/:uuid', async (req, res) => {
+    updateInformer(req, res);
+  });
+
+  routes.patch('/informerClosestUpdate/:donor_uuid/:informer_uuid', async (req, res) => {
+    updateClosestInformer(req, res);
+});
+
 
 
 

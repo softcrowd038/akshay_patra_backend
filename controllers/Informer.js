@@ -62,7 +62,7 @@ const informerDetails = async (req, res) => {
       try {
         const decodedInformer = await validateToken(req, res);
         const {
-          uuid, description, capture_date, capture_time, count, location, latitude, longitude,
+          uuid, description, capture_date, capture_time, count, location, latitude, longitude, status
         } = req.body;
   
         const missingFields = checkRequiredFields(req.body, [
@@ -74,6 +74,7 @@ const informerDetails = async (req, res) => {
           { key: 'latitude', name: 'Latitude' },
           { key: 'longitude', name: 'Longitude' },
           { key: 'count', name: 'Count' },
+          { key: 'status', name: 'Status' },
         ]);
   
         if (missingFields) {
@@ -84,17 +85,82 @@ const informerDetails = async (req, res) => {
         await Informer.createInformerTable();
 
         const imageurl = req.file ? `uploads/${req.file.filename}` : '';
-        await Informer.createInformer(uuid, imageurl, description, capture_date, capture_time, count, location, latitude, longitude);
+        await Informer.createInformer(uuid, imageurl, description, capture_date, capture_time, count, location, latitude, longitude, status);
+
+        await Informer.createInformerHistoryTable();
+        await Informer.createInformerHistory(uuid, imageurl, description, capture_date, capture_time, count, location, latitude, longitude);
         return res.status(201).send({ success: true, message: 'Informer created successfully', uuid });
   
       } catch (error) {
-        console.error("Error creating Informer Meal:", error);
+        console.error("Error creating Informer :", error);
         return res.status(500).send({ success: false, message: 'Error occurred while creating Informer', error: error.message });
       }
     });
 };
 
+const getInformerDetails = async (req, res) => {
+ 
+  try {
+    const decodedInformer = await validateToken(req, res);
+    if (!decodedInformer) return; 
+    const informer = await Informer.getallInformer();
+    if (!informer) {
+      return res.status(404).send({ success: false, message: 'Informer  not found.' });
+    }
+    return res.status(200).send({ success: true, data: informer });
+  } catch (error) {
+    console.error("Error fetching Informer  details:", error);
+    return res.status(500).send({ success: false, message: 'Error occurred while fetching Informer  details', error: error.message });
+  }
+};
+
+const getInformerHistoryDetails = async (req, res) => {
+      const {uuid} = req.params;
+  try {
+    const decodedInformer = await validateToken(req, res);
+    if (!decodedInformer) return; 
+    const informer = await Informer.getinformerHistoryByUUID(uuid);
+    if (!informer) {
+      return res.status(404).send({ success: false, message: 'Informer History not found.' });
+    }
+    return res.status(200).send({ success: true, data: informer });
+  } catch (error) {
+    console.error("Error fetching Informer History details:", error);
+    return res.status(500).send({ success: false, message: 'Error occurred while fetching Informer history details', error: error.message });
+  }
+};
+
+const updateInformer = async (req, res) => {
+  try {
+    const { uuid } = req.params; // Get UUID from URL parameters
+    const decodedInformer = await validateToken(req, res);
+    if (!decodedInformer) return;
+
+    const fieldsToUpdate = {};
+    const { imageurl, description, capture_date, capture_time, count, location, latitude, longitude, status } = req.body;
+
+    // Only add fields that are provided in the request
+    if (imageurl) fieldsToUpdate.imageurl = imageurl;
+    if (description) fieldsToUpdate.description = description;
+    if (capture_date) fieldsToUpdate.capture_date = capture_date;
+    if (capture_time) fieldsToUpdate.capture_time = capture_time;
+    if (count) fieldsToUpdate.count = count;
+    if (location) fieldsToUpdate.location = location;
+    if (latitude) fieldsToUpdate.latitude = latitude;
+    if (longitude) fieldsToUpdate.longitude = longitude;
+    if (status) fieldsToUpdate.status = status;
+
+
+    // Update the informer in the database
+    await Informer.updateInformer(uuid, fieldsToUpdate);
+
+    return res.status(200).send({ success: true, message: 'Informer updated successfully', uuid });
+  } catch (error) {
+    console.error("Error updating Informer:", error);
+    return res.status(500).send({ success: false, message: 'Error occurred while updating Informer', error: error.message });
+  }
+};
 
 
 
-export { informerDetails};
+export { informerDetails, getInformerDetails, getInformerHistoryDetails, updateInformer};
