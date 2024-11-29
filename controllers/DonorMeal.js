@@ -1,54 +1,53 @@
 import fs from 'fs';
 import path from 'path';
-import Donor from '../Models/DonorModel.js'; 
+import Donor from '../Models/DonorModel.js';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
-import moment from 'moment'; // Import moment
 
 // Ensure that uploads directory exist or not
 const ensureUploadsDirectory = () => {
   const dir = path.resolve('G:', 'Rutik', 'project', 'akshay_patra_backend', 'uploads');
   if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true }); 
+    fs.mkdirSync(dir, { recursive: true });
   }
 };
 
 ensureUploadsDirectory();
 
-// multer library code
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const dir = path.resolve('G:', 'Rutik', 'project', 'akshay_patra_backend', 'uploads');
     if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true }); 
+      fs.mkdirSync(dir, { recursive: true });
     }
-    cb(null, dir); 
+    cb(null, dir);
   },
   filename: (req, file, cb) => cb(null, `${Date.now()}${path.extname(file.originalname)}`),
 });
 
 const upload = multer({ storage }).single('imageurl');
 
-// Token validation code
+
 const validateToken = (req, res) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-  
-    if (!token) {
-      return res.status(401).send({ success: false, message: 'Access token is missing.' });
-    }
-  
-    return new Promise((resolve, reject) => {
-      jwt.verify(token, `${process.env.JWT_SECRET}`, (err, decodedDonor) => {
-        if (err) {
-          return reject(res.status(403).send({ success: false, message: 'Invalid token.' }));
-        }
-        resolve(decodedDonor);
-      });
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).send({ success: false, message: 'Access token is missing.' });
+  }
+
+  return new Promise((resolve, reject) => {
+    jwt.verify(token, `${process.env.JWT_SECRET}`, (err, decodedDonor) => {
+      if (err) {
+        return reject(res.status(403).send({ success: false, message: 'Invalid token.' }));
+      }
+      resolve(decodedDonor);
     });
+  });
 };
 
-// Check required fields validation
+
 const checkRequiredFields = (body, requiredFields) => {
   const missingFields = requiredFields.filter(field => !body[field.key]).map(field => field.name);
   return missingFields.length > 0 ? missingFields : null;
@@ -98,11 +97,11 @@ const donorMealDetails = async (req, res) => {
   });
 };
 
- const getDonorMealDetailsByUUID = async (req, res) => {
-  const { uuid } = req.params; 
+const getDonorMealDetailsByUUID = async (req, res) => {
+  const { uuid } = req.params;
   try {
     const decodedDonor = await validateToken(req, res);
-    if (!decodedDonor) return; 
+    if (!decodedDonor) return;
     const donorMeal = await Donor.getDonorMealByUUID(uuid);
     if (!donorMeal) {
       return res.status(404).send({ success: false, message: 'Donor Meal not found.' });
@@ -113,14 +112,14 @@ const donorMealDetails = async (req, res) => {
     return res.status(500).send({ success: false, message: 'Error occurred while fetching Donor Meal details', error: error.message });
   }
 
-  
+
 };
 
 const getDonorMealHistoryDetailsByUUID = async (req, res) => {
-  const { uuid } = req.params; 
+  const { uuid } = req.params;
   try {
     const decodedDonor = await validateToken(req, res);
-    if (!decodedDonor) return; 
+    if (!decodedDonor) return;
     const donorMeal = await Donor.getDonorMealHistoryByUUID(uuid);
     if (!donorMeal) {
       return res.status(404).send({ success: false, message: 'Donor Meal not found.' });
@@ -133,4 +132,4 @@ const getDonorMealHistoryDetailsByUUID = async (req, res) => {
 };
 
 
-export { donorMealDetails, getDonorMealDetailsByUUID, validateToken, getDonorMealHistoryDetailsByUUID};
+export { donorMealDetails, getDonorMealDetailsByUUID, validateToken, getDonorMealHistoryDetailsByUUID };

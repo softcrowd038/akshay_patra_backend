@@ -4,43 +4,84 @@ const NearByLocation = {
 
   async createClosestInformerTable() {
     const query = `
-          CREATE TABLE IF NOT EXISTS ClosestInformer (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            donor_uuid VARCHAR(255),
-            informer_uuid VARCHAR(255),
-            distance DECIMAL(10, 6),
-            description TEXT,
-            capture_date DATE,
-            capture_time TIME,
-            count INT,
-            location VARCHAR(255),
-            latitude DECIMAL(18, 15),
-            longitude DECIMAL(18, 15),
-            status VARCHAR(255),
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-          );
-        `;
+      CREATE TABLE IF NOT EXISTS ClosestInformer (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        donor_uuid VARCHAR(255),
+        informer_uuid VARCHAR(255),
+        distance DECIMAL(10, 6),
+        description TEXT,
+        imageurl VARCHAR(255) NOT NULL,
+        capture_date DATE,
+        capture_time TIME,
+        count INT,
+        location VARCHAR(255),
+        latitude DECIMAL(18, 15),
+        longitude DECIMAL(18, 15),
+        status VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
     await mysqlPool.query(query);
   },
 
-  async storeClosestInformer(donor_uuid, informer_uuid, distance, description, capture_date, capture_time, count, location, latitude, longitude, status) {
+
+  async findClosestInformer(donor_uuid, informer_uuid, capture_date, location) {
     const query = `
-          INSERT INTO ClosestInformer (donor_uuid, informer_uuid, distance, description, capture_date, capture_time, count, location, latitude, longitude, status)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `;
-    await mysqlPool.query(query, [donor_uuid, informer_uuid, distance, description, capture_date, capture_time, count, location, latitude, longitude, status]);
+      SELECT * FROM ClosestInformer
+      WHERE donor_uuid = ? AND informer_uuid = ? AND capture_date = ? AND location = ?
+    `;
+    const [results] = await mysqlPool.query(query, [donor_uuid, informer_uuid, capture_date, location]);
+    return results.length > 0 ? results[0] : null;
   },
 
 
+  async storeClosestInformer(donor_uuid, informer_uuid, distance, description, imageurl, capture_date, capture_time, count, location, latitude, longitude, status) {
+
+    if (donor_uuid === informer_uuid) {
+      console.warn(`Donor UUID and Informer UUID are the same: ${donor_uuid}. Data not stored.`);
+      return;
+    }
+
+    const existingRecord = await this.findClosestInformer(donor_uuid, informer_uuid, capture_date, location);
+    if (existingRecord) {
+      console.warn(`Duplicate entry found. Data not stored for donor_uuid: ${donor_uuid}, informer_uuid: ${informer_uuid}.`);
+      return;
+    }
+
+    const query = `
+      INSERT INTO ClosestInformer (donor_uuid, informer_uuid, distance, description, imageurl, capture_date, capture_time, count, location, latitude, longitude, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    await mysqlPool.query(query, [donor_uuid, informer_uuid, distance, description, imageurl, capture_date, capture_time, count, location, latitude, longitude, status]);
+  },
+
+  async deleteClosestInformerByUUID(donor_uuid, informer_uuid) {
+    const query = `
+      DELETE FROM ClosestInformer
+      WHERE donor_uuid = ? AND informer_uuid = ?
+    `;
+    await mysqlPool.query(query, [donor_uuid, informer_uuid]);
+  },
+
   async getClosestInformersByDonorUUID(donorUUID) {
     const query = `
-          SELECT informer_uuid, distance, description, capture_date, capture_time, count, location, latitude, longitude, status
-          FROM ClosestInformer
-          WHERE donor_uuid = ?
-          ORDER BY distance ASC;
-        `;
-
+      SELECT informer_uuid, distance, description, imageurl, capture_date, capture_time, count, location, latitude, longitude, status
+      FROM ClosestInformer
+      WHERE donor_uuid = ?
+      ORDER BY distance ASC;
+    `;
     const [results] = await mysqlPool.query(query, [donorUUID]);
+    return results;
+  },
+
+  async getClosestInformersByDonorUUIDAndInformerUUID(donorUUID, informerUUID) {
+    const query = `
+      SELECT informer_uuid, distance, description, imageurl, capture_date, capture_time, count, location, latitude, longitude, status
+      FROM ClosestInformer
+      WHERE donor_uuid = ? AND informer_uuid = ?
+      ORDER BY distance ASC;
+    `;
+    const [results] = await mysqlPool.query(query, [donorUUID, informerUUID]);
     return results;
   },
 
@@ -57,18 +98,12 @@ const NearByLocation = {
       throw new Error('No fields to update');
     }
 
-
-    const updateQuery = `UPDATE CLOSESTINFORMER SET ${updates.join(', ')} WHERE donor_uuid = ? AND informer_uuid = ?`;
-
-
+    const updateQuery = `UPDATE ClosestInformer SET ${updates.join(', ')} WHERE donor_uuid = ? AND informer_uuid = ?`;
     values.push(donor_uuid, informer_uuid);
-
 
     await mysqlPool.query(updateQuery, values);
     return donor_uuid;
   }
+};
 
-
-}
-
-export default NearByLocation
+export default NearByLocation;

@@ -1,14 +1,14 @@
-import mysqlPool from '../db.js'; 
+import mysqlPool from '../db.js';
 
 const User = {
   async findByEmail(email) {
     const [rows] = await mysqlPool.query('SELECT * FROM users WHERE email = ?', [email]);
-    return rows[0]; 
+    return rows[0];
   },
-  
+
   async createUser(uuid, username, email, passwordHash) {
     const [result] = await mysqlPool.query('INSERT INTO users (uuid, username, email, password) VALUES (?, ?, ?, ?)', [uuid, username, email, passwordHash]);
-    return result.insertId; 
+    return result.insertId;
   },
 
   async createUserProfile(uuid, imageurl, username, firstname, lastname, location, latitude, longitude, birthdate) {
@@ -25,8 +25,23 @@ const User = {
   async getUserProfileByUUID(uuid) {
     const query = `SELECT * FROM usersProfile WHERE uuid = ?`;
     const [rows] = await mysqlPool.query(query, [uuid]);
-    return rows[0]; 
+    return rows[0];
   },
+
+  async createUsersTable() {
+    const createUsersTable = `
+      CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        uuid VARCHAR(36) NOT NULL UNIQUE,
+        username VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+    await mysqlPool.query(createUsersTable);
+  }
+  ,
 
   async createUserProfileTable() {
     const createUserProfileTable = `
@@ -44,13 +59,13 @@ const User = {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
-    await mysqlPool.query(createUserProfileTable); 
+    await mysqlPool.query(createUserProfileTable);
   },
 
   async deleteUserProfileByUUID(uuid) {
     const deleteQuery = `DELETE FROM usersProfile WHERE uuid = ?`;
     const [result] = await mysqlPool.query(deleteQuery, [uuid]);
-    return result.affectedRows > 0; 
+    return result.affectedRows > 0;
   }
 };
 
