@@ -7,7 +7,7 @@ import moment from 'moment';
 import mysqlPool from '../db.js';
 
 const ensureUploadsDirectory = () => {
-  const dir = path.resolve('G:', 'Rutik', 'project', 'akshay_patra_backend', 'uploads');
+  const dir = path.resolve('uploads');
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -17,7 +17,7 @@ ensureUploadsDirectory();
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const dir = path.resolve('G:', 'Rutik', 'project', 'akshay_patra_backend', 'uploads');
+    const dir = path.resolve('uploads');
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
@@ -104,7 +104,7 @@ const getInformerDetails = async (req, res) => {
 
     const today = moment().format("YYYY-MM-DD");
     const expiredUUIDs = informers
-      .filter(informer => moment(informer.capture_date, "DD/MM/YYYY").isBefore(today))
+      .filter(informer => moment(informer.capture_date, "DD/MM/YYYY").isBefore(today) || informer.status === "delivered")
       .map(informer => informer.uuid);
 
     if (expiredUUIDs.length > 0) {

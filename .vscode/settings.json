@@ -1,5 +1,9 @@
 {
     "editor.wordWrap": "on",
     "chat.editor.wordWrap": "on",
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "python.analysis.autoFormatStrings": true,
+    "editor.formatOnPaste": true,
+    "editor.formatOnType": true,
+    "notebook.formatOnSave.enabled": true
 }

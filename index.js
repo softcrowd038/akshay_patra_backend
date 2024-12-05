@@ -12,6 +12,8 @@ app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use("/api/v1", locationRoutes);
+app.use("/uploads", express.static(path.resolve('uploads')));
+
 
 const PORT = process.env.PORT || 8080;
 
