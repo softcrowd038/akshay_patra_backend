@@ -3,17 +3,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { validateToken } from "./DonorMeal.js";
 
 
-
-// Controller to create a comment
 const createComment = async (req, res) => {
     console.log('Request Body:', req.body);
 
     const decodedDonor = await validateToken(req, res);
     if (!decodedDonor) return;
 
-    const { uuid, post_uuid, user_uuid, comment, comment_date, comment_time } = req.body;
+    const { uuid, post_uuid, user_uuid, comment} = req.body;
 
-    const requiredFields = ['uuid', 'post_uuid', 'user_uuid', 'comment', 'comment_date', 'comment_time'];
+    const requiredFields = ['post_uuid', 'user_uuid', 'comment'];
     const missingFields = [];
 
     requiredFields.forEach(field => {
@@ -29,12 +27,14 @@ const createComment = async (req, res) => {
         });
     }
 
-    // Generate comment_uuid
     const comment_uuid = uuidv4();
+    const now = new Date();
+    const comment_date = now.toISOString().split("T")[0];
+    const comment_time = now.toTimeString().split(" ")[0];
 
     try {
         await comments.createCommentTable();
-        await comments.postComment(uuid, post_uuid, comment_uuid, user_uuid, comment, comment_date, comment_time);
+        await comments.postComment(post_uuid, comment_uuid, user_uuid, comment, comment_date, comment_time);
         return res.status(201).json({ success: true, message: 'Comment posted successfully.' });
     } catch (error) {
         console.error('Error creating comment:', error);
@@ -54,7 +54,6 @@ const getAllComments = async (req, res) => {
     }
 }
 
-// Controller to get comment by UUID
 const getCommentByUUID = async (req, res) => {
     const { uuid } = req.params;
 
@@ -77,7 +76,7 @@ const getCommentByUUID = async (req, res) => {
     }
 }
 
-// Controller to get comments by post_uuid
+
 const getCommentsByPostUUID = async (req, res) => {
     const { post_uuid } = req.params;
 

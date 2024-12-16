@@ -1,11 +1,10 @@
 import mysqlPool from "../db.js";
 
-// Create the comments table
 const comments = {
 
     async createCommentTable() {
         const commentTable = `CREATE TABLE IF NOT EXISTS comments(
-            uuid VARCHAR(36) PRIMARY KEY,
+            id INT AUTO_INCREMENT PRIMARY KEY,
             post_uuid VARCHAR(36),
             comment_uuid VARCHAR(36) NOT NULL,
             user_uuid VARCHAR(36) NOT NULL,
@@ -24,15 +23,15 @@ const comments = {
         }
     },
 
-    // Post a comment
-    async postComment(uuid, post_uuid, comment_uuid, user_uuid, comment, comment_date, comment_time) {
+
+    async postComment(post_uuid, comment_uuid, user_uuid, comment, comment_date, comment_time) {
         const postCommentQuery = `
-            INSERT INTO comments (uuid, post_uuid, comment_uuid, user_uuid, comment, comment_date, comment_time)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO comments (post_uuid, comment_uuid, user_uuid, comment, comment_date, comment_time)
+            VALUES (?, ?, ?, ?, ?, ?)
         `;
         try {
             await mysqlPool.query(postCommentQuery, [
-                uuid, post_uuid, comment_uuid, user_uuid, comment, comment_date, comment_time
+               post_uuid, comment_uuid, user_uuid, comment, comment_date, comment_time
             ]);
             console.log("Comment posted successfully.");
         } catch (error) {
@@ -41,7 +40,7 @@ const comments = {
         }
     },
 
-    // Get all comments
+
     async getAllComments() {
         const getAllCommentsQuery = `SELECT * FROM comments`;
         try {
@@ -53,7 +52,7 @@ const comments = {
         }
     },
 
-    // Get comments by UUID
+
     async getCommentByUUID(uuid) {
         const getCommentByUUIDQuery = `SELECT * FROM comments WHERE uuid = ?`;
         try {
@@ -65,7 +64,7 @@ const comments = {
         }
     },
 
-    // Get comments by post_uuid
+
     async getCommentsByPostUUID(post_uuid) {
         const getCommentsByPostUUIDQuery = `SELECT * FROM comments WHERE post_uuid = ?`;
         try {
@@ -77,7 +76,7 @@ const comments = {
         }
     },
 
-    // Get comments by comment_uuid
+
     async getCommentsByCommentUUID(comment_uuid) {
         const getCommentsByCommentUUIDQuery = `SELECT * FROM comments WHERE comment_uuid = ?`;
         try {
@@ -89,7 +88,6 @@ const comments = {
         }
     },
 
-    // Delete comment by comment_uuid
     async deleteCommentByCommentUUID(comment_uuid) {
         const deleteCommentByCommentUUIDQuery = `DELETE FROM comments WHERE comment_uuid = ?`;
         try {

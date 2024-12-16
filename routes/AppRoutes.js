@@ -7,10 +7,13 @@ import { donorMealDetails, getDonorMealDetailsByUUID, getDonorMealHistoryDetails
 import { getInformerDetails, getInformerHistoryDetails, informerDetails, updateInformer } from '../controllers/Informer.js';
 import { getAllClosestInformerByDonorUUIDAndInformerUUID, getAllClosestInformers, getClosestInformersByClosestUUID, storeAllClosestInformers, updateClosestInformer } from '../controllers/NearbyLocationController.js';
 import {
-    createPost, getAllPosts, getPostByPostUUID, getPostByUUID
+    createPost, getAllPosts, getPostByPostUUID, getPostByUUID,
+    updateLikesCount
 
 } from '../controllers/PostsController.js';
 import { createComment, getAllComments, getCommentByUUID, getCommentsByPostUUID, getCommentsByCommentUUID, deleteCommentByCommentUUID } from '../controllers/CommentController.js';
+import { getLikeStatus, getSumOfLikes, postLikeStatus, updateLikeStatus } from '../controllers/LikeController.js';
+import { createFollowStatus, getFollowStatsbyAccountUUID, getFollowStatusByAcoountUUID, getFollowStatusByAcoountUUIDAndFollowUUID, updateFollowStatus } from '../controllers/FollowController.js';
 
 
 const routes = express.Router();
@@ -112,6 +115,8 @@ routes.get('/getpostsbyid/:uuid', getPostByUUID);
 
 routes.get('/getpostsbypostid/:post_uuid', getPostByPostUUID);
 
+routes.patch('/updatepostslike/:post_uuid', updateLikesCount);
+
 routes.post('/createcomment', createComment);
 
 routes.get('/getallcomments', getAllComments);
@@ -123,5 +128,21 @@ routes.get('/getcommentsbypostuuid/:post_uuid', getCommentsByPostUUID);
 routes.get('/getcommentsbycommentsuuid/:comment_uuid', getCommentsByCommentUUID);
 
 routes.delete('/deletecommentsbycommentuuid/:comment_uuid', deleteCommentByCommentUUID);
+
+routes.post('/postlikestatus', postLikeStatus);
+
+routes.get('/getLikesbyuuidandpostuuid/:uuid/:post_uuid', getLikeStatus);
+routes.patch('/updateLikestatusbyuuidandpostuuid/:uuid/:post_uuid', updateLikeStatus);
+routes.get('/sum-likes/:post_uuid', getSumOfLikes);
+
+routes.post("/addfollower", createFollowStatus);
+
+routes.get("/follower/:account_uuid/:followed_by_uuid", getFollowStatusByAcoountUUIDAndFollowUUID);
+
+routes.get("/accountfollower/:account_uuid", getFollowStatusByAcoountUUID);
+
+routes.patch("/updateFollowStatus/:account_uuid/:followed_by_uuid", updateFollowStatus);
+
+routes.get("/follow-stats/:account_uuid", getFollowStatsbyAccountUUID);
 
 export default routes;

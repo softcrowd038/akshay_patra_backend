@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import jwt from 'jsonwebtoken';
+import { validateToken } from "./DonorMeal.js";
 import multer from 'multer';
 import Post from '../Models/PostModel.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -23,23 +23,6 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage }).single('post_url');
-
-const validateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (!token) {
-        return res.status(401).json({ success: false, message: 'Access token is missing.' });
-    }
-
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-        if (err) {
-            return res.status(403).json({ success: false, message: 'Invalid token.' });
-        }
-        req.user = decoded;
-        next();
-    });
-};
 
 
 const createPost = async (req, res) => {
@@ -150,5 +133,28 @@ const getPostByPostUUID = async (req, res) => {
 };
 
 
+const updateLikesCount = async (req, res) => {
+    const { post_uuid } = req.params;
+    const { newLikes } = req.body;
 
-export { validateToken, createPost, getAllPosts, getPostByUUID, getPostByPostUUID };
+    if (typeof newLikes !== 'number' || newLikes < 0) {
+        return res.status(400).json({ success: false, message: 'Invalid likes count.' });
+    }
+
+    try {
+        const postUpdated = await Post.updateLikesCount(post_uuid, newLikes);
+
+        if (postUpdated) {
+            res.status(200).json({ success: true, message: 'Likes count updated successfully.' });
+        } else {
+            res.status(404).json({ success: false, message: 'Post not found or no update performed.' });
+        }
+    } catch (error) {
+        console.error("Error updating likes count:", error);
+        res.status(500).json({ success: false, message: 'Error occurred while updating likes count.', error: error.message });
+    }
+};
+
+
+
+export { validateToken, createPost, getAllPosts, getPostByUUID, getPostByPostUUID, updateLikesCount };

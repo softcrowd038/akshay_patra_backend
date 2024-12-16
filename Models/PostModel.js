@@ -111,6 +111,28 @@ const Post = {
             throw err;
         }
     },
+    
+    async updateLikesCount(post_uuid, newLikes) {
+        const updateLikesQuery = `
+        UPDATE posts 
+        SET likes = ? 
+        WHERE post_uuid = ?
+    `;
+
+        try {
+            const [result] = await mysqlPool.query(updateLikesQuery, [newLikes, post_uuid]);
+            if (result.affectedRows > 0) {
+                console.log("Likes count updated successfully.");
+                return true;
+            } else {
+                console.log("No matching record found for update.");
+                return false;
+            }
+        } catch (error) {
+            console.error("Error updating likes count:", error);
+            throw error;
+        }
+    }
 };
 
 export default Post;
