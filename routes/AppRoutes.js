@@ -2,19 +2,18 @@ import express from 'express';
 import { getLatLong, getLatLongByID, createLatLong, deleteLatLongById } from '../controllers/LocationControllers.js';
 import registerUser from '../controllers/RegistrationController.js';
 import loginUser from '../controllers/LoginControllers.js';
-import { fetchUserProfile, profileDetails, updateUserProfile } from '../controllers/ProfileDetails.js';
+import { deleteUser, deleteUserProfile, fetchUserProfile, profileDetails, updateUserProfile } from '../controllers/ProfileDetails.js';
 import { donorMealDetails, getDonorMealDetailsByUUID, getDonorMealHistoryDetailsByUUID } from '../controllers/DonorMeal.js';
 import { getInformerDetails, getInformerHistoryDetails, informerDetails, updateInformer } from '../controllers/Informer.js';
 import { getAllClosestInformerByDonorUUIDAndInformerUUID, getAllClosestInformers, getClosestInformersByClosestUUID, storeAllClosestInformers, updateClosestInformer } from '../controllers/NearbyLocationController.js';
 import {
-    createPost, getAllPosts, getPostByPostUUID, getPostByUUID,
+    createPost, deletePostByPostUUID, deletePostByUUID, getAllPosts, getPostByPostUUID, getPostByUUID,
     updateLikesCount
 
 } from '../controllers/PostsController.js';
-import { createComment, getAllComments, getCommentByUUID, getCommentsByPostUUID, getCommentsByCommentUUID, deleteCommentByCommentUUID } from '../controllers/CommentController.js';
-import { getLikeStatus, getSumOfLikes, postLikeStatus, updateLikeStatus } from '../controllers/LikeController.js';
-import { createFollowStatus, getFollowStatsbyAccountUUID, getFollowStatusByAcoountUUID, getFollowStatusByAcoountUUIDAndFollowUUID, updateFollowStatus } from '../controllers/FollowController.js';
-
+import { createComment, getAllComments, getCommentByUUID, getCommentsByPostUUID, getCommentsByCommentUUID, deleteCommentByCommentUUID, deleteCommentByUserUUID } from '../controllers/CommentController.js';
+import { deleteLikeStatus, getLikeStatus, getSumOfLikes, postLikeStatus, updateLikeStatus } from '../controllers/LikeController.js';
+import { createFollowStatus, deleteFollowController, getFollowStatsbyAccountUUID, getFollowStatsbyFollwedByUUID, getFollowStatusByAcoountUUID, getFollowStatusByAcoountUUIDAndFollowUUID, updateFollowStatus } from '../controllers/FollowController.js';
 
 const routes = express.Router();
 
@@ -46,6 +45,9 @@ routes.post("/login", (req, res) => {
     loginUser(req, res);
 });
 
+routes.delete("/deleteuser/:uuid", (req, res) => {
+    deleteUser(req, res);
+});
 
 routes.post("/profiledetails", (req, res) => {
     profileDetails(req, res);
@@ -58,6 +60,11 @@ routes.get("/profile/:uuid", (req, res) => {
 routes.put("/updateprofile/:uuid", (req, res) => {
     updateUserProfile(req, res);
 });
+
+routes.delete("/deleteprofile/:uuid", (req, res) => {
+    deleteUserProfile(req, res);
+});
+
 
 routes.post("/donormeal", (req, res) => {
     donorMealDetails(req, res);
@@ -117,6 +124,10 @@ routes.get('/getpostsbypostid/:post_uuid', getPostByPostUUID);
 
 routes.patch('/updatepostslike/:post_uuid', updateLikesCount);
 
+routes.delete('/postbyuuid/:uuid', deletePostByUUID);
+
+routes.delete('/postbypost_uuid/:post_uuid', deletePostByPostUUID);
+
 routes.post('/createcomment', createComment);
 
 routes.get('/getallcomments', getAllComments);
@@ -144,5 +155,13 @@ routes.get("/accountfollower/:account_uuid", getFollowStatusByAcoountUUID);
 routes.patch("/updateFollowStatus/:account_uuid/:followed_by_uuid", updateFollowStatus);
 
 routes.get("/follow-stats/:account_uuid", getFollowStatsbyAccountUUID);
+
+routes.get("/following-stats/:followed_by_uuid", getFollowStatsbyFollwedByUUID);
+
+routes.delete("/deletefollower/:account_uuid", deleteFollowController);
+
+routes.delete('/deletelikestatus/:uuid', deleteLikeStatus);
+
+routes.delete('/deletecomment/:user_uuid', deleteCommentByUserUUID);
 
 export default routes;

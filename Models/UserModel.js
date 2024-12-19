@@ -62,8 +62,42 @@ const User = {
     await mysqlPool.query(createUserProfileTable);
   },
 
+  async updateUserProfile(uuid, fieldsToUpdate) {
+    const updateFields = [];
+    const updateValues = [];
+
+    for (const [field, value] of Object.entries(fieldsToUpdate)) {
+      if (value !== undefined && value !== null) {
+        updateFields.push(`${field} = ?`);
+        updateValues.push(value);
+      }
+    }
+
+    if (updateFields.length === 0) {
+      throw new Error('No fields to update');
+    }
+
+    const updateQuery = `
+    UPDATE usersProfile 
+    SET ${updateFields.join(', ')} 
+    WHERE uuid = ?
+  `;
+
+    updateValues.push(uuid);
+
+    const [result] = await mysqlPool.query(updateQuery, updateValues);
+
+    return result.affectedRows > 0;
+  },
+
   async deleteUserProfileByUUID(uuid) {
     const deleteQuery = `DELETE FROM usersProfile WHERE uuid = ?`;
+    const [result] = await mysqlPool.query(deleteQuery, [uuid]);
+    return result.affectedRows > 0;
+  },
+
+  async deleteUserByUUID(uuid) {
+    const deleteQuery = `DELETE FROM users WHERE uuid = ?`;
     const [result] = await mysqlPool.query(deleteQuery, [uuid]);
     return result.affectedRows > 0;
   }

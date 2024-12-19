@@ -97,6 +97,17 @@ const comments = {
             console.error("Error deleting comment by comment_uuid:", error);
             throw error;
         }
+    },
+
+    async deleteCommentByCommentUUID(user_uuid) {
+        const deleteCommentByCommentUUIDQuery = `DELETE FROM comments WHERE user_uuid = ?`;
+        try {
+            const result = await mysqlPool.query(deleteCommentByCommentUUIDQuery, [user_uuid]);
+            return result.affectedRows > 0;
+        } catch (error) {
+            console.error("Error deleting comment by comment_uuid:", error);
+            throw error;
+        }
     }
 };
 

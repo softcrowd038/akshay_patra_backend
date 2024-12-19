@@ -67,7 +67,7 @@ const getFollowStatusByAcoountUUIDAndFollowUUID = async (req, res) => {
 };
 
 const getFollowStatusByAcoountUUID = async (req, res) => {
-    const { account_uuid} = req.params;
+    const { account_uuid } = req.params;
 
     if (!account_uuid) {
         return res.status(400).json({
@@ -95,7 +95,7 @@ const getFollowStatusByAcoountUUID = async (req, res) => {
 
 const updateFollowStatus = async (req, res) => {
     const { account_uuid, followed_by_uuid } = req.params;
-    const updates = req.body; 
+    const updates = req.body;
 
     if (!account_uuid || !followed_by_uuid || Object.keys(updates).length === 0) {
         return res.status(400).json({
@@ -145,4 +145,52 @@ const getFollowStatsbyAccountUUID = async (req, res) => {
     }
 };
 
-export { createFollowStatus, getFollowStatusByAcoountUUIDAndFollowUUID, getFollowStatusByAcoountUUID, updateFollowStatus, getFollowStatsbyAccountUUID };
+const getFollowStatsbyFollwedByUUID = async (req, res) => {
+    const { followed_by_uuid } = req.params;
+
+    if (!followed_by_uuid) {
+        return res.status(400).json({
+            success: false,
+            message: "Missing required field: account_uuid."
+        });
+    }
+
+    try {
+        const stats = await FollowAccount.getFollowingStats(followed_by_uuid);
+
+        return res.status(200).json({
+            success: true,
+            followed_by_uuid,
+            stats
+        });
+    } catch (error) {
+        console.error("Error fetching follow stats:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error."
+        });
+    }
+};
+
+
+const deleteFollowController = async (req, res) => {
+    const { account_uuid } = req.params;
+
+    try {
+        const result = await FollowAccount.deleteFollowByAccountUUID(account_uuid);
+        if (result.success) {
+            return res.status(200).json(result); // Send success message
+        } else {
+            return res.status(404).json(result); // No follow relationships found
+        }
+    } catch (error) {
+        console.error("Error in deleteFollowController:", error);
+        return res.status(500).json({
+            success: false,
+            message: "An error occurred while deleting follow relationships.",
+            error: error.message,
+        });
+    }
+};
+
+export { createFollowStatus, getFollowStatusByAcoountUUIDAndFollowUUID, getFollowStatusByAcoountUUID, updateFollowStatus, getFollowStatsbyAccountUUID, getFollowStatsbyFollwedByUUID, deleteFollowController };

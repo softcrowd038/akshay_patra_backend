@@ -111,7 +111,7 @@ const Post = {
             throw err;
         }
     },
-    
+
     async updateLikesCount(post_uuid, newLikes) {
         const updateLikesQuery = `
         UPDATE posts 
@@ -132,7 +132,52 @@ const Post = {
             console.error("Error updating likes count:", error);
             throw error;
         }
+    },
+
+    async deletePostByUUID(uuid) {
+        const deletePostQuery = `
+        DELETE FROM posts 
+        WHERE uuid = ?
+    `;
+
+        try {
+            const [result] = await mysqlPool.query(deletePostQuery, [uuid]);
+            if (result.affectedRows > 0) {
+                console.log("Post deleted successfully.");
+                return true;
+            } else {
+                console.log("No matching post found to delete.");
+                return false;
+            }
+        } catch (error) {
+            console.error("Error deleting post:", error);
+            throw error;
+        }
+    },
+
+    async deletePostByPostUUID(post_uuid) {
+        const deletePostQuery = `
+        DELETE FROM posts 
+        WHERE post_uuid = ?
+    `;
+
+        try {
+            const [result] = await mysqlPool.query(deletePostQuery, [post_uuid]);
+            if (result.affectedRows > 0) {
+                console.log("Post deleted successfully.");
+                return true;
+            } else {
+                console.log("No matching post found to delete.");
+                return false;
+            }
+        } catch (error) {
+            console.error("Error deleting post:", error);
+            throw error;
+        }
     }
+
+
+
 };
 
 export default Post;

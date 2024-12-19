@@ -84,7 +84,7 @@ const FollowAccount = {
     },
 
     async updateFollowStatus(account_uuid, followed_by_uuid, updates) {
-       
+
         const setClause = Object.keys(updates)
             .map((key) => `${key} = ?`)
             .join(", ");
@@ -115,17 +115,16 @@ const FollowAccount = {
 
     async getFollowStats(account_uuid) {
         const selectQuery = `
-            SELECT 
-                SUM(CASE WHEN status = 'follow' THEN 1 ELSE 0 END) AS total_followers,
-                SUM(CASE WHEN followed_by_uuid = ? THEN 1 ELSE 0 END) AS total_following
-            FROM followaccount
-        `;
+        SELECT 
+            CAST(SUM(follower) AS SIGNED) AS total_followers
+        FROM followaccount
+        WHERE account_uuid = ? AND status = 'follow'
+    `;
 
         try {
             const [results] = await mysqlPool.query(selectQuery, [account_uuid]);
             const stats = {
                 total_followers: results[0]?.total_followers || 0,
-                total_following: results[0]?.total_following || 0
             };
             console.log("Follow stats retrieved successfully.", stats);
             return stats;
@@ -133,7 +132,50 @@ const FollowAccount = {
             console.error("Error fetching follow stats:", error);
             throw error;
         }
-    }
+    },
+
+
+    async getFollowingStats(followed_by_uuid) {
+        const selectQuery = `
+        SELECT 
+            CAST(SUM(follower) AS SIGNED) AS total_following
+        FROM followaccount
+        WHERE followed_by_uuid = ? AND status = 'follow'
+    `;
+
+        try {
+            const [results] = await mysqlPool.query(selectQuery, [followed_by_uuid]);
+            const stats = {
+                total_following: results[0]?.total_following || 0,
+            };
+            console.log("Follow stats retrieved successfully.", stats);
+            return stats;
+        } catch (error) {
+            console.error("Error fetching follow stats:", error);
+            throw error;
+        }
+    },
+
+    async deleteFollowByAccountUUID(account_uuid) {
+        const deleteQuery = `
+            DELETE FROM followaccount 
+            WHERE account_uuid = ? OR followed_by_uuid = ?
+        `;
+        try {
+            const [result] = await mysqlPool.query(deleteQuery, [account_uuid, account_uuid]);
+            if (result.affectedRows > 0) {
+                console.log(`Follow relationships for account ${account_uuid} deleted successfully.`);
+                return { success: true, message: `Follow relationships for account ${account_uuid} deleted successfully.` };
+            } else {
+                console.log(`No follow relationships found for account ${account_uuid}.`);
+                return { success: false, message: `No follow relationships found for account ${account_uuid}.` };
+            }
+        } catch (error) {
+            console.error("Error deleting follow by account UUID:", error);
+            throw error;
+        }
+    },
+
 
 };
 

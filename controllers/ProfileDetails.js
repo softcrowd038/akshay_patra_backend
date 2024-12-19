@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import User from '../Models/UserModel.js'; 
+import User from '../Models/UserModel.js';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
 
@@ -8,7 +8,7 @@ import multer from 'multer';
 const ensureUploadsDirectory = () => {
   const dir = path.resolve('uploads');
   if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true }); 
+    fs.mkdirSync(dir, { recursive: true });
   }
 };
 
@@ -18,11 +18,11 @@ ensureUploadsDirectory();
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const dir = path.resolve('uploads');
-   
+
     if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true }); 
+      fs.mkdirSync(dir, { recursive: true });
     }
-    cb(null, dir); 
+    cb(null, dir);
   },
   filename: (req, file, cb) => cb(null, `${Date.now()}${path.extname(file.originalname)}`),
 });
@@ -72,7 +72,7 @@ const profileDetails = async (req, res) => {
         birthdate,
       } = req.body;
 
-     
+
       const missingFields = checkRequiredFields(req.body, [
         { key: 'uuid', name: 'UUID' },
         { key: 'username', name: 'Username' },
@@ -114,20 +114,22 @@ const updateUserProfile = async (req, res) => {
         return res.status(400).send({ success: false, message: 'UUID is required.' });
       }
 
-      const {
-        username,
-        firstname,
-        lastname,
-        location,
-        latitude,
-        longitude,
-        birthdate,
-      } = req.body;
 
-      const imageurl = req.file ? `uploads/${req.file.filename}` : null;
+      const fieldsToUpdate = { ...req.body };
 
-      await User.updateUserProfile(uuid, imageurl, username, firstname, lastname, location, latitude, longitude, birthdate);
-      return res.status(200).send({ success: true, message: 'User profile updated successfully', uuid });
+
+      if (req.file) {
+        fieldsToUpdate.imageurl = `uploads/${req.file.filename}`;
+      }
+
+
+      const success = await User.updateUserProfile(uuid, fieldsToUpdate);
+
+      if (success) {
+        return res.status(200).send({ success: true, message: 'User profile updated successfully', uuid });
+      } else {
+        return res.status(400).send({ success: false, message: 'No changes made to the profile.' });
+      }
 
     } catch (error) {
       console.error("Error updating user profile:", error);
@@ -136,15 +138,12 @@ const updateUserProfile = async (req, res) => {
   });
 };
 
-
 const fetchUserProfile = async (req, res) => {
   try {
-    const user = await validateToken(req, res);
+
     const { uuid } = req.params;
 
-    if (!uuid) {
-      return res.status(400).send({ success: false, message: 'UUID is required.' });
-    }
+
 
     const userProfile = await User.getUserProfileByUUID(uuid);
     if (!userProfile) {
@@ -182,4 +181,26 @@ const deleteUserProfile = async (req, res) => {
   }
 };
 
-export { profileDetails, fetchUserProfile, updateUserProfile, deleteUserProfile };
+const deleteUser = async (req, res) => {
+  try {
+    const user = await validateToken(req, res);
+    const { uuid } = req.params;
+
+    if (!uuid) {
+      return res.status(400).send({ success: false, message: 'UUID is required.' });
+    }
+
+    const deletedProfile = await User.deleteUserByUUID(uuid);
+    if (!deletedProfile) {
+      return res.status(404).send({ success: false, message: 'User  not found or already deleted.' });
+    }
+
+    return res.status(200).send({ success: true, message: 'User  deleted successfully' });
+
+  } catch (error) {
+    console.error("Error deleting user :", error);
+    return res.status(500).send({ success: false, message: 'Error occurred while deleting user ', error: error.message });
+  }
+};
+
+export { profileDetails, fetchUserProfile, updateUserProfile, deleteUserProfile, deleteUser };

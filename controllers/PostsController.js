@@ -40,7 +40,7 @@ const createPost = async (req, res) => {
             const decodedDonor = await validateToken(req, res);
             if (!decodedDonor) return;
             const post_url = req.file ? `uploads/${req.file.filename}` : '';
-
+            await Post.createPostTable();
 
             const missingFields = [];
             if (!uuid) missingFields.push('uuid');
@@ -59,7 +59,7 @@ const createPost = async (req, res) => {
             }
 
             const post_uuid = uuidv4();
-            await Post.createPostTable();
+
             await Post.postDataToPosts(
                 uuid,
                 post_uuid,
@@ -82,8 +82,7 @@ const createPost = async (req, res) => {
 
 const getAllPosts = async (req, res) => {
     try {
-        const decodedDonor = await validateToken(req, res);
-        if (!decodedDonor) return;
+
         const posts = await Post.getPostsData();
         res.status(200).json({ success: true, data: posts });
     } catch (error) {
@@ -153,8 +152,46 @@ const updateLikesCount = async (req, res) => {
         console.error("Error updating likes count:", error);
         res.status(500).json({ success: false, message: 'Error occurred while updating likes count.', error: error.message });
     }
+
+
+};
+
+
+const deletePostByUUID = async (req, res) => {
+    const { uuid } = req.params;
+
+    try {
+        const result = await Post.deletePostByUUID(uuid);
+
+        if (result) {
+            return res.status(200).json({ message: 'Post deleted successfully' });
+        } else {
+            return res.status(404).json({ message: 'No matching post found to delete' });
+        }
+    } catch (error) {
+        console.error('Error deleting post:', error);
+        return res.status(500).json({ message: 'An error occurred while deleting the post' });
+    }
+};
+
+// Delete post by post_uuid
+const deletePostByPostUUID = async (req, res) => {
+    const { post_uuid } = req.params;
+
+    try {
+        const result = await Post.deletePostByPostUUID(post_uuid);
+
+        if (result) {
+            return res.status(200).json({ message: 'Post deleted successfully' });
+        } else {
+            return res.status(404).json({ message: 'No matching post found to delete' });
+        }
+    } catch (error) {
+        console.error('Error deleting post:', error);
+        return res.status(500).json({ message: 'An error occurred while deleting the post' });
+    }
 };
 
 
 
-export { validateToken, createPost, getAllPosts, getPostByUUID, getPostByPostUUID, updateLikesCount };
+export { validateToken, createPost, getAllPosts, getPostByUUID, getPostByPostUUID, updateLikesCount, deletePostByUUID, deletePostByPostUUID };

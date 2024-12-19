@@ -9,7 +9,7 @@ const createComment = async (req, res) => {
     const decodedDonor = await validateToken(req, res);
     if (!decodedDonor) return;
 
-    const { uuid, post_uuid, user_uuid, comment} = req.body;
+    const { uuid, post_uuid, user_uuid, comment } = req.body;
 
     const requiredFields = ['post_uuid', 'user_uuid', 'comment'];
     const missingFields = [];
@@ -143,8 +143,25 @@ const deleteCommentByCommentUUID = async (req, res) => {
         console.error('Error deleting comment by comment_uuid:', error);
         return res.status(500).json({ success: false, message: 'Internal server error.' });
     }
-}
+};
+
+
+const deleteCommentByUserUUID = async (req, res) => {
+    const { user_uuid } = req.params;
+
+    try {
+        const result = await comments.deleteCommentByCommentUUID(user_uuid);
+        if (result) {
+            return res.status(200).json({ message: "Comment deleted successfully." });
+        } else {
+            return res.status(404).json({ message: "No comment found for the given user_uuid." });
+        }
+    } catch (error) {
+        console.error("Error in deleteCommentByUserUUID controller:", error);
+        return res.status(500).json({ message: "Internal server error." });
+    }
+};
 
 
 
-export { createComment, getAllComments, getCommentByUUID, getCommentsByPostUUID, getCommentsByCommentUUID, deleteCommentByCommentUUID };
+export { createComment, getAllComments, getCommentByUUID, getCommentsByPostUUID, getCommentsByCommentUUID, deleteCommentByCommentUUID, deleteCommentByUserUUID };

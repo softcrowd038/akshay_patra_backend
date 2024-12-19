@@ -2,7 +2,7 @@ import Likes from '../Models/LikesModel.js';
 import { validateToken } from "./DonorMeal.js";
 
 const postLikeStatus = async (req, res) => {
-    console.log("Request Body:", req.body); 
+    console.log("Request Body:", req.body);
 
     const decodedDonor = await validateToken(req, res);
     if (!decodedDonor) return;
@@ -21,7 +21,7 @@ const postLikeStatus = async (req, res) => {
     const like_time = now.toTimeString().split(" ")[0];
 
     try {
-        await Likes.createPostLikeStatusTable(); 
+        await Likes.createPostLikeStatusTable();
         console.log("Executing Likes.postLikeStatus()...");
 
         await Likes.postLikeStatus(uuid, post_uuid, status, likes, like_date, like_time);
@@ -31,7 +31,7 @@ const postLikeStatus = async (req, res) => {
             message: "Like status posted successfully.",
         });
     } catch (error) {
-        console.error("Error creating like status:", error); 
+        console.error("Error creating like status:", error);
         return res.status(500).json({
             success: false,
             message: "Internal server error.",
@@ -118,4 +118,22 @@ const getSumOfLikes = async (req, res) => {
 };
 
 
-export { postLikeStatus, getLikeStatus, updateLikeStatus, getSumOfLikes };
+const deleteLikeStatus = async (req, res) => {
+    const { uuid } = req.params;  
+
+    try {
+        const result = await Likes.deleteLikeStatus(uuid); 
+        if (result.success) {
+            return res.status(200).json({ message: result.message });
+        } else {
+            return res.status(404).json({ message: result.message });
+        }
+    } catch (error) {
+        console.error("Error in deleteLikeStatus controller:", error);
+        return res.status(500).json({ message: "Internal server error." });
+    }
+};
+
+
+
+export { postLikeStatus, getLikeStatus, updateLikeStatus, getSumOfLikes, deleteLikeStatus };
