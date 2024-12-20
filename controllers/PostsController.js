@@ -174,7 +174,6 @@ const deletePostByUUID = async (req, res) => {
     }
 };
 
-// Delete post by post_uuid
 const deletePostByPostUUID = async (req, res) => {
     const { post_uuid } = req.params;
 

@@ -1,3 +1,4 @@
+import { deleteCommentByUserUUID } from "../controllers/CommentController.js";
 import mysqlPool from "../db.js";
 
 const comments = {
@@ -31,7 +32,7 @@ const comments = {
         `;
         try {
             await mysqlPool.query(postCommentQuery, [
-               post_uuid, comment_uuid, user_uuid, comment, comment_date, comment_time
+                post_uuid, comment_uuid, user_uuid, comment, comment_date, comment_time
             ]);
             console.log("Comment posted successfully.");
         } catch (error) {
@@ -99,10 +100,21 @@ const comments = {
         }
     },
 
-    async deleteCommentByCommentUUID(user_uuid) {
-        const deleteCommentByCommentUUIDQuery = `DELETE FROM comments WHERE user_uuid = ?`;
+    async deleteCommentByUserUUID(user_uuid) {
+        const deleteCommentByUserUUIDQuery = `DELETE FROM comments WHERE user_uuid = ?`;
         try {
-            const result = await mysqlPool.query(deleteCommentByCommentUUIDQuery, [user_uuid]);
+            const result = await mysqlPool.query(deleteCommentByUserUUIDQuery, [user_uuid]);
+            return result.affectedRows > 0;
+        } catch (error) {
+            console.error("Error deleting comment by comment_uuid:", error);
+            throw error;
+        }
+    },
+
+    async deleteCommentByPostUUID(post_uuid) {
+        const deleteCommentByPostUUIDQuery = `DELETE FROM comments WHERE post_uuid = ?`;
+        try {
+            const result = await mysqlPool.query(deleteCommentByPostUUIDQuery, [post_uuid]);
             return result.affectedRows > 0;
         } catch (error) {
             console.error("Error deleting comment by comment_uuid:", error);

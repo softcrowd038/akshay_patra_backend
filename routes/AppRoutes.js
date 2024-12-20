@@ -11,8 +11,8 @@ import {
     updateLikesCount
 
 } from '../controllers/PostsController.js';
-import { createComment, getAllComments, getCommentByUUID, getCommentsByPostUUID, getCommentsByCommentUUID, deleteCommentByCommentUUID, deleteCommentByUserUUID } from '../controllers/CommentController.js';
-import { deleteLikeStatus, getLikeStatus, getSumOfLikes, postLikeStatus, updateLikeStatus } from '../controllers/LikeController.js';
+import { createComment, getAllComments, getCommentByUUID, getCommentsByPostUUID, getCommentsByCommentUUID, deleteCommentByCommentUUID, deleteCommentByUserUUID, deleteCommentByPostUUID } from '../controllers/CommentController.js';
+import { deleteLikeStatus, deleteLikeStatusByPostUUid, getLikeStatus, getSumOfLikes, postLikeStatus, updateLikeStatus } from '../controllers/LikeController.js';
 import { createFollowStatus, deleteFollowController, getFollowStatsbyAccountUUID, getFollowStatsbyFollwedByUUID, getFollowStatusByAcoountUUID, getFollowStatusByAcoountUUIDAndFollowUUID, updateFollowStatus } from '../controllers/FollowController.js';
 
 const routes = express.Router();
@@ -126,7 +126,7 @@ routes.patch('/updatepostslike/:post_uuid', updateLikesCount);
 
 routes.delete('/postbyuuid/:uuid', deletePostByUUID);
 
-routes.delete('/postbypost_uuid/:post_uuid', deletePostByPostUUID);
+routes.delete('/deletepostbypost_uuid/:post_uuid', deletePostByPostUUID);
 
 routes.post('/createcomment', createComment);
 
@@ -140,11 +140,17 @@ routes.get('/getcommentsbycommentsuuid/:comment_uuid', getCommentsByCommentUUID)
 
 routes.delete('/deletecommentsbycommentuuid/:comment_uuid', deleteCommentByCommentUUID);
 
+routes.delete('/deletecommentsbypostuuid/:post_uuid', deleteCommentByPostUUID);
+
 routes.post('/postlikestatus', postLikeStatus);
 
 routes.get('/getLikesbyuuidandpostuuid/:uuid/:post_uuid', getLikeStatus);
+
 routes.patch('/updateLikestatusbyuuidandpostuuid/:uuid/:post_uuid', updateLikeStatus);
+
 routes.get('/sum-likes/:post_uuid', getSumOfLikes);
+
+routes.delete('/deletelikesbypostuuid/:post_uuid', deleteLikeStatusByPostUUid);
 
 routes.post("/addfollower", createFollowStatus);
 

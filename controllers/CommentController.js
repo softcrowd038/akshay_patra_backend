@@ -162,6 +162,22 @@ const deleteCommentByUserUUID = async (req, res) => {
     }
 };
 
+const deleteCommentByPostUUID = async (req, res) => {
+    const { post_uuid } = req.params;
+
+    try {
+        const result = await comments.deleteCommentByPostUUID(post_uuid);
+        if (result) {
+            return res.status(200).json({ message: "Comment deleted successfully." });
+        } else {
+            return res.status(404).json({ message: "No comment found for the given user_uuid." });
+        }
+    } catch (error) {
+        console.error("Error in deleteCommentByUserUUID controller:", error);
+        return res.status(500).json({ message: "Internal server error." });
+    }
+};
 
 
-export { createComment, getAllComments, getCommentByUUID, getCommentsByPostUUID, getCommentsByCommentUUID, deleteCommentByCommentUUID, deleteCommentByUserUUID };
+
+export { createComment, getAllComments, getCommentByUUID, getCommentsByPostUUID, getCommentsByCommentUUID, deleteCommentByCommentUUID, deleteCommentByUserUUID, deleteCommentByPostUUID };

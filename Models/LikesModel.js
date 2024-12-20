@@ -143,6 +143,26 @@ const Likes = {
             console.error("Error deleting like status:", error);
             throw error;
         }
+    },
+
+    async deleteLikeStatusByPostUUid(post_uuid) {
+        const deleteQuery = `
+      DELETE FROM likestatus 
+      WHERE post_uuid = ?
+    `;
+        try {
+            const [result] = await mysqlPool.query(deleteQuery, [post_uuid]);
+            if (result.affectedRows > 0) {
+                console.log("Like status deleted successfully.");
+                return { success: true, message: "Like status deleted successfully." };
+            } else {
+                console.log("No matching record found to delete.");
+                return { success: false, message: "No matching record found to delete." };
+            }
+        } catch (error) {
+            console.error("Error deleting like status:", error);
+            throw error;
+        }
     }
 };
 

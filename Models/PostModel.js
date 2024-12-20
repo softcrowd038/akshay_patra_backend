@@ -102,7 +102,7 @@ const Post = {
     },
 
     async getPostsData() {
-        const getPostsData = `SELECT * FROM posts`;
+        const getPostsData = `SELECT * FROM posts ORDER BY created_at DESC`;
         try {
             const [rows] = await mysqlPool.query(getPostsData);
             return rows;
