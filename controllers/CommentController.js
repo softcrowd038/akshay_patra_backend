@@ -99,7 +99,6 @@ const getCommentsByPostUUID = async (req, res) => {
     }
 }
 
-// Controller to get comments by comment_uuid
 const getCommentsByCommentUUID = async (req, res) => {
     const { comment_uuid } = req.params;
 

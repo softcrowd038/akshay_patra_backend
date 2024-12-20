@@ -179,9 +179,9 @@ const deleteFollowController = async (req, res) => {
     try {
         const result = await FollowAccount.deleteFollowByAccountUUID(account_uuid);
         if (result.success) {
-            return res.status(200).json(result); // Send success message
+            return res.status(200).json(result);
         } else {
-            return res.status(404).json(result); // No follow relationships found
+            return res.status(404).json(result);
         }
     } catch (error) {
         console.error("Error in deleteFollowController:", error);

@@ -39,7 +39,6 @@ const NearByLocation = {
       capture_date, capture_time, count, location, latitude, longitude, status,
     } = data;
 
-    // Ensure the table exists before proceeding
     await this.createClosestInformerTable();
 
     if (donor_uuid === informer_uuid) {

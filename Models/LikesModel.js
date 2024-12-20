@@ -44,7 +44,7 @@ const Likes = {
                 return { success: false, message: "Duplicate like status." };
             }
 
-            // Proceed to insert if no duplicate exists
+
             await mysqlPool.query(insertQuery, [uuid, post_uuid, status, likes, like_date, like_time]);
             console.log("Like status posted successfully.");
             return { success: true, message: "Like status posted successfully." };
@@ -117,7 +117,7 @@ const Likes = {
             const [results] = await mysqlPool.query(selectQuery, [postUuid]);
             const totalLikes = results[0]?.totalLikes ? parseInt(results[0].totalLikes, 10) : 0;
             console.log("Total Likes:", totalLikes);
-            console.log("Total Likes Type:", typeof totalLikes); // Confirm it's an integer
+            console.log("Total Likes Type:", typeof totalLikes);
             return totalLikes;
         } catch (error) {
             console.error("Error fetching sum of likes:", error);

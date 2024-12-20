@@ -158,7 +158,7 @@ const fetchUserProfile = async (req, res) => {
   }
 };
 
-// Delete user profile
+
 const deleteUserProfile = async (req, res) => {
   try {
     const user = await validateToken(req, res);

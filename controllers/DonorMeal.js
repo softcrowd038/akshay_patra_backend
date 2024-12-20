@@ -4,7 +4,6 @@ import Donor from '../Models/DonorModel.js';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
 
-// Ensure that uploads directory exist or not
 const ensureUploadsDirectory = () => {
   const dir = path.resolve('uploads');
   if (!fs.existsSync(dir)) {
