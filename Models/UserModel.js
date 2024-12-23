@@ -11,6 +11,7 @@ const User = {
     return result.insertId;
   },
 
+
   async createUserProfile(uuid, imageurl, username, firstname, lastname, location, latitude, longitude, birthdate) {
     const insertUserProfile = `
       INSERT INTO usersProfile (uuid, imageurl, username, firstname, lastname, location, latitude, longitude, birthdate)

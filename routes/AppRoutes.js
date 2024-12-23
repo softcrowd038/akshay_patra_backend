@@ -49,6 +49,7 @@ routes.delete("/deleteuser/:uuid", (req, res) => {
     deleteUser(req, res);
 });
 
+
 routes.post("/profiledetails", (req, res) => {
     profileDetails(req, res);
 });
