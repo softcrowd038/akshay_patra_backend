@@ -1,4 +1,4 @@
-import FollowAccount from "../models/FollowModel.js";
+import FollowAccount from "../Models/FollowModel.js";
 import { validateToken } from "./DonorMeal.js";
 
 const createFollowStatus = async (req, res) => {
