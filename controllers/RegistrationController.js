@@ -1,6 +1,6 @@
-import bcrypt from 'bcrypt'; 
+import bcrypt from 'bcryptjs';
 import User from '../Models/UserModel.js';
-import { v4 as uuidv4 } from 'uuid';  
+import { v4 as uuidv4 } from 'uuid';
 
 const registerUser = async (req, res) => {
   try {
@@ -14,10 +14,10 @@ const registerUser = async (req, res) => {
         message: "Please provide username, email, password",
       });
     }
-    
 
 
-    await User.createUsersTable(); 
+
+    await User.createUsersTable();
 
     const existingUser = await User.findByEmail(email);
     if (existingUser) {
@@ -31,7 +31,7 @@ const registerUser = async (req, res) => {
     const passwordHash = await bcrypt.hash(password, salt);
     const uuid = uuidv4();
     const userId = await User.createUser(uuid, username, email, passwordHash);
-    
+
 
     res.status(201).send({
       success: true,
